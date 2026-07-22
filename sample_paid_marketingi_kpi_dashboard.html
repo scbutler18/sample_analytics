@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Paid Marketing — Performance Report</title>
+<style>
+  :root {
+    --bg: #f1f3f4;
+    --surface: #ffffff;
+    --ink: #202124;
+    --muted: #5f6368;
+    --line: #dadce0;
+    --blue: #1a73e8;
+    --blue-soft: #e8f0fe;
+    --green: #188038;
+    --red: #d93025;
+    --amber: #e37400;
+    --purple: #7b1fa2;
+    --teal: #12a4a4;
+    --shadow: 0 1px 2px rgba(60,64,67,.15), 0 1px 3px rgba(60,64,67,.1);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Google Sans", Roboto, -apple-system, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  header.topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 28px;
+    display: flex; align-items: center; gap: 14px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 16px;
+  }
+  .topbar h1 { font-size: 18px; margin: 0; font-weight: 500; }
+  .topbar .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .topbar .spacer { flex: 1; }
+  .daterange {
+    font-size: 13px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 12px; background: var(--surface);
+  }
+  main { padding: 24px 28px 60px; max-width: 1180px; margin: 0 auto; }
+  .section-title { font-size: 15px; font-weight: 500; margin: 26px 0 12px; color: var(--ink); }
+  .section-title:first-child { margin-top: 4px; }
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .cards.six { grid-template-columns: repeat(4, 1fr); }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .card .label { font-size: 12px; color: var(--muted); }
+  .card .value { font-size: 25px; font-weight: 500; margin: 6px 0 4px; }
+  .card .delta { font-size: 12.5px; font-weight: 500; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+  .delta.flat { color: var(--muted); }
+  .delta .muted { color: var(--muted); font-weight: 400; }
+  .panel {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 18px;
+  }
+  .panel h3 { margin: 0 0 4px; font-size: 14px; font-weight: 500; }
+  .panel .cap { color: var(--muted); font-size: 12px; margin: 0 0 14px; }
+  .grid-2 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  .bar-cell { display: flex; align-items: center; gap: 8px; }
+  .bar-track { flex: 1; height: 8px; background: #eef1f4; border-radius: 6px; overflow: hidden; min-width: 60px; }
+  .bar-fill { height: 100%; border-radius: 6px; background: var(--blue); }
+  .chip { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .tag.good { background: #e6f4ea; color: var(--green); }
+  .tag.warn { background: #fef7e0; color: var(--amber); }
+  .tag.bad  { background: #fce8e6; color: var(--red); }
+  .insight {
+    background: var(--blue-soft); border: 1px solid #c6dafc; border-radius: 10px;
+    padding: 12px 16px; font-size: 13px; color: #174ea6; margin-top: 4px;
+  }
+  .insight b { color: #0b3d91; }
+  .chartbox { position: relative; height: 220px; margin-top: 8px; }
+  svg { width: 100%; height: 100%; display: block; }
+  .axis-label { font-size: 10px; fill: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+  .legend span { display: flex; align-items: center; }
+  /* pacing bars */
+  .pace-row { margin-bottom: 16px; }
+  .pace-head { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; }
+  .pace-head .name { font-weight: 500; }
+  .pace-head .val { color: var(--muted); }
+  .pace-track { height: 12px; background: #eef1f4; border-radius: 8px; position: relative; overflow: hidden; }
+  .pace-fill { height: 100%; border-radius: 8px; }
+  .pace-target { position: absolute; top: -3px; width: 2px; height: 18px; background: var(--ink); }
+  @media (max-width: 900px) {
+    .cards, .cards.six { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">◱</div>
+  <div>
+    <h1>Paid Marketing — Performance Report</h1>
+    <div class="sub">All Channels · Monthly Manager Snapshot</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="daterange">📅 June 2026 &nbsp;·&nbsp; vs. May 2026</div>
+</header>
+
+<main>
+
+  <!-- ============ HEADLINE KPIs ============ -->
+  <div class="section-title">Headline KPIs</div>
+  <div class="cards">
+    <div class="card">
+      <div class="label">Ad Spend</div>
+      <div class="value">$742.5K</div>
+      <div class="delta up">▲ 6.2% <span class="muted">MoM</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Revenue (attributed)</div>
+      <div class="value">$3.12M</div>
+      <div class="delta up">▲ 11.8% <span class="muted">MoM</span></div>
+    </div>
+    <div class="card">
+      <div class="label">ROAS</div>
+      <div class="value">4.20×</div>
+      <div class="delta up">▲ 0.21× <span class="muted">MoM</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Conversions</div>
+      <div class="value">28,470</div>
+      <div class="delta up">▲ 9.4% <span class="muted">MoM</span></div>
+    </div>
+  </div>
+
+  <!-- ============ EFFICIENCY KPIs ============ -->
+  <div class="section-title">Efficiency metrics</div>
+  <div class="cards">
+    <div class="card">
+      <div class="label">CPA / CAC</div>
+      <div class="value">$26.08</div>
+      <div class="delta up">▼ 3.0% <span class="muted">MoM · lower is better</span></div>
+    </div>
+    <div class="card">
+      <div class="label">CTR</div>
+      <div class="value">2.14%</div>
+      <div class="delta up">▲ 0.12 pts <span class="muted">MoM</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Avg. CPC</div>
+      <div class="value">$1.38</div>
+      <div class="delta down">▲ 4.5% <span class="muted">MoM · higher is worse</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Conversion Rate</div>
+      <div class="value">5.20%</div>
+      <div class="delta up">▲ 0.30 pts <span class="muted">MoM</span></div>
+    </div>
+  </div>
+
+  <div class="insight" style="margin-top:14px">
+    <b>30-second read:</b> A strong month. Revenue (+11.8%) outpaced spend (+6.2%), so <b>ROAS climbed to 4.20×</b>
+    and CPA fell to $26. CPC ticked up (auction pressure), but a better conversion rate (5.2%) more than absorbed it.
+    Watch item: Display is still dragging blended efficiency — see channel table.
+  </div>
+
+  <!-- ============ TREND + PACING ============ -->
+  <div class="grid-2">
+    <div class="panel">
+      <h3>Spend vs. Revenue trend</h3>
+      <p class="cap">Monthly attributed revenue vs. ad spend</p>
+      <div class="chartbox">
+        <svg viewBox="0 0 620 220" preserveAspectRatio="none">
+          <line x1="40" y1="30"  x2="600" y2="30"  stroke="#eef1f4" />
+          <line x1="40" y1="80"  x2="600" y2="80"  stroke="#eef1f4" />
+          <line x1="40" y1="130" x2="600" y2="130" stroke="#eef1f4" />
+          <line x1="40" y1="175" x2="600" y2="175" stroke="#dadce0" />
+          <!-- revenue (blue) -->
+          <polyline fill="none" stroke="#1a73e8" stroke-width="2.5"
+            points="70,120 180,108 290,96 400,84 510,70 590,58" />
+          <!-- spend (amber) -->
+          <polyline fill="none" stroke="#e37400" stroke-width="2.5"
+            points="70,158 180,154 290,150 400,146 510,142 590,138" />
+          <g fill="#1a73e8">
+            <circle cx="70" cy="120" r="3"/><circle cx="180" cy="108" r="3"/><circle cx="290" cy="96" r="3"/>
+            <circle cx="400" cy="84" r="3"/><circle cx="510" cy="70" r="3"/><circle cx="590" cy="58" r="3"/>
+          </g>
+          <g fill="#e37400">
+            <circle cx="70" cy="158" r="3"/><circle cx="180" cy="154" r="3"/><circle cx="290" cy="150" r="3"/>
+            <circle cx="400" cy="146" r="3"/><circle cx="510" cy="142" r="3"/><circle cx="590" cy="138" r="3"/>
+          </g>
+          <text class="axis-label" x="62"  y="192">Jan</text>
+          <text class="axis-label" x="172" y="192">Feb</text>
+          <text class="axis-label" x="282" y="192">Mar</text>
+          <text class="axis-label" x="392" y="192">Apr</text>
+          <text class="axis-label" x="500" y="192">May</text>
+          <text class="axis-label" x="578" y="192">Jun</text>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><span class="chip" style="background:#1a73e8"></span>Attributed revenue</span>
+        <span><span class="chip" style="background:#e37400"></span>Ad spend</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Pacing to monthly goals</h3>
+      <p class="cap">Actual vs. target · black line = 100% of goal</p>
+
+      <div class="pace-row">
+        <div class="pace-head"><span class="name">Revenue</span><span class="val">$3.12M / $3.00M · 104%</span></div>
+        <div class="pace-track"><div class="pace-fill" style="width:100%;background:#188038"></div><div class="pace-target" style="left:96%"></div></div>
+      </div>
+      <div class="pace-row">
+        <div class="pace-head"><span class="name">Conversions</span><span class="val">28,470 / 30,000 · 95%</span></div>
+        <div class="pace-track"><div class="pace-fill" style="width:95%;background:#e37400"></div><div class="pace-target" style="left:99%"></div></div>
+      </div>
+      <div class="pace-row">
+        <div class="pace-head"><span class="name">Spend (budget)</span><span class="val">$742.5K / $750K · 99%</span></div>
+        <div class="pace-track"><div class="pace-fill" style="width:99%;background:#1a73e8"></div><div class="pace-target" style="left:99%"></div></div>
+      </div>
+      <div class="pace-row">
+        <div class="pace-head"><span class="name">ROAS</span><span class="val">4.20× / 4.00× · 105%</span></div>
+        <div class="pace-track"><div class="pace-fill" style="width:100%;background:#188038"></div><div class="pace-target" style="left:95%"></div></div>
+      </div>
+      <div class="insight" style="margin-top:6px">
+        On or ahead of goal on revenue, spend, and ROAS. <b>Conversions are the one lagging KPI (95%)</b> —
+        volume, not efficiency, is the gap to close.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CHANNEL PERFORMANCE ============ -->
+  <div class="section-title">Channel performance</div>
+  <div class="panel">
+    <table>
+      <thead>
+        <tr>
+          <th>Channel</th>
+          <th class="num">Spend</th>
+          <th class="num">Conv.</th>
+          <th class="num">CPA</th>
+          <th class="num">CTR</th>
+          <th class="num">CVR</th>
+          <th class="num">Revenue</th>
+          <th class="num">ROAS</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="chip" style="background:#1a73e8"></span>Google Ads (Search)</td><td class="num">$236.0K</td><td class="num">10,980</td><td class="num">$21.49</td><td class="num">4.1%</td><td class="num">7.2%</td><td class="num">$1.12M</td><td class="num">4.7×</td><td><span class="tag good">Strong</span></td></tr>
+        <tr><td><span class="chip" style="background:#12a4a4"></span>Meta</td><td class="num">$198.5K</td><td class="num">8,240</td><td class="num">$24.09</td><td class="num">1.6%</td><td class="num">5.4%</td><td class="num">$892K</td><td class="num">4.5×</td><td><span class="tag good">Strong</span></td></tr>
+        <tr><td><span class="chip" style="background:#7b1fa2"></span>TikTok</td><td class="num">$122.0K</td><td class="num">4,510</td><td class="num">$27.05</td><td class="num">1.1%</td><td class="num">3.8%</td><td class="num">$473K</td><td class="num">3.9×</td><td><span class="tag good">Healthy</span></td></tr>
+        <tr><td><span class="chip" style="background:#e37400"></span>Bing / Microsoft</td><td class="num">$74.0K</td><td class="num">3,120</td><td class="num">$23.72</td><td class="num">3.4%</td><td class="num">6.1%</td><td class="num">$342K</td><td class="num">4.6×</td><td><span class="tag good">Strong</span></td></tr>
+        <tr><td><span class="chip" style="background:#5f6368"></span>Display / Programmatic</td><td class="num">$112.0K</td><td class="num">1,620</td><td class="num">$69.14</td><td class="num">0.3%</td><td class="num">1.4%</td><td class="num">$301K</td><td class="num">2.7×</td><td><span class="tag bad">Underperforming</span></td></tr>
+      </tbody>
+    </table>
+    <div class="insight" style="margin-top:16px">
+      <b>Action:</b> Display is the clear laggard — $69 CPA and 2.7× ROAS vs. a 4.2× blended average. Shifting ~40% of
+      Display budget ($45K) into Search &amp; Bing (best CPAs at $21–24) is modeled to add ~1,400 conversions at the same
+      spend — directly closing the conversion-volume gap flagged in pacing.
+    </div>
+  </div>
+
+  <!-- ============ TOP CAMPAIGNS + FUNNEL SNAPSHOT ============ -->
+  <div class="grid-2">
+    <div class="panel">
+      <h3>Top campaigns by ROAS</h3>
+      <p class="cap">Highest-return active campaigns this month</p>
+      <table>
+        <thead><tr><th>Campaign</th><th class="num">Spend</th><th class="num">ROAS</th><th style="width:90px">vs avg</th></tr></thead>
+        <tbody id="campTable"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>Conversion funnel</h3>
+      <p class="cap">Impressions → revenue, June</p>
+      <table>
+        <tbody>
+          <tr><td>Impressions</td><td class="num">248.0M</td></tr>
+          <tr><td>Clicks</td><td class="num">5.31M</td></tr>
+          <tr><td>CTR</td><td class="num">2.14%</td></tr>
+          <tr><td>Landing sessions</td><td class="num">547,600</td></tr>
+          <tr><td>Conversions</td><td class="num">28,470</td></tr>
+          <tr><td>Conversion rate</td><td class="num">5.20%</td></tr>
+          <tr><td>Attributed revenue</td><td class="num">$3.12M</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Top campaigns
+  var camps = [
+    { name: 'Brand — Search Exact', spend: 61000, roas: 6.8 },
+    { name: 'Retargeting — Meta Dynamic', spend: 48000, roas: 5.9 },
+    { name: 'Non-Brand — High Intent', spend: 84000, roas: 4.9 },
+    { name: 'Bing — Competitor Terms', spend: 33000, roas: 4.6 },
+    { name: 'TikTok — Prospecting', spend: 72000, roas: 3.7 }
+  ];
+  var blended = 4.2;
+  var ctab = document.getElementById('campTable');
+  camps.forEach(function(c){
+    var diff = (c.roas - blended);
+    var cls = diff >= 0 ? 'good' : 'bad';
+    var sign = diff >= 0 ? '+' : '';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>'+c.name+'</td>'+
+      '<td class="num">$'+(c.spend/1000).toFixed(0)+'K</td>'+
+      '<td class="num">'+c.roas.toFixed(1)+'×</td>'+
+      '<td><span class="tag '+cls+'">'+sign+diff.toFixed(1)+'×</span></td>';
+    ctab.appendChild(tr);
+  });
+</script>
+<p style="color:#9aa0a6;font-size:11px;text-align:center;margin:0 0 24px;">Sample built with illustrative data.</p>
+</body>
+</html>
