@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marketing Analytics — Work Samples</title>
+<style>
+  :root {
+    --bg: #f1f3f4;
+    --surface: #ffffff;
+    --ink: #202124;
+    --muted: #5f6368;
+    --line: #dadce0;
+    --blue: #1a73e8;
+    --teal: #12a4a4;
+    --shadow: 0 1px 2px rgba(60,64,67,.15), 0 1px 3px rgba(60,64,67,.1);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Google Sans", Roboto, -apple-system, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .hero {
+    background: linear-gradient(120deg, #1a73e8, #12a4a4);
+    color: #fff; padding: 48px 28px 40px;
+  }
+  .hero-inner { max-width: 960px; margin: 0 auto; }
+  .hero h1 { margin: 0 0 8px; font-size: 30px; font-weight: 500; }
+  .hero p { margin: 0; font-size: 15px; opacity: .95; max-width: 640px; line-height: 1.5; }
+  main { max-width: 960px; margin: -24px auto 0; padding: 0 28px 60px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 22px 20px; box-shadow: var(--shadow); text-decoration: none; color: inherit;
+    display: flex; flex-direction: column; transition: box-shadow .15s, transform .15s;
+  }
+  .card:hover { box-shadow: 0 4px 14px rgba(60,64,67,.2); transform: translateY(-2px); }
+  .card .icon {
+    width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 22px; margin-bottom: 14px; color: #fff;
+  }
+  .card h2 { margin: 0 0 6px; font-size: 17px; font-weight: 500; }
+  .card p { margin: 0 0 14px; font-size: 13.5px; color: var(--muted); line-height: 1.5; flex: 1; }
+  .card .cta { font-size: 13px; font-weight: 500; color: var(--blue); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .tag { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: #eef3fe; color: #174ea6; font-weight: 500; }
+  .full { grid-column: 1 / -1; }
+  footer {
+    max-width: 960px; margin: 0 auto; padding: 8px 28px 40px;
+    color: #9aa0a6; font-size: 12px; text-align: center;
+  }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <h1>Marketing Analytics — Work Samples</h1>
+      <p>A short portfolio demonstrating paid-marketing reporting, customer-journey analysis,
+         and SQL. All figures are illustrative and built to show methodology — no proprietary data is used.</p>
+    </div>
+  </div>
+
+  <main>
+    <div class="grid">
+
+      <a class="card" href="sample_paid_marketing_kpi_dashboard.html">
+        <div class="icon" style="background:#1a73e8">◱</div>
+        <div class="tags"><span class="tag">Reporting</span><span class="tag">Paid media</span><span class="tag">KPIs</span></div>
+        <h2>Paid Marketing Performance Dashboard</h2>
+        <p>A manager-facing snapshot of the core paid KPIs — spend, revenue, ROAS, CPA, CTR, and
+           conversion rate — with channel breakdowns, goal pacing, and top-campaign analysis.</p>
+        <span class="cta">View dashboard →</span>
+      </a>
+
+      <a class="card" href="sample_course_progress_funnel.html">
+        <div class="icon" style="background:#12a4a4">🔀</div>
+        <div class="tags"><span class="tag">Customer journey</span><span class="tag">Funnel</span><span class="tag">Retention</span></div>
+        <h2>Customer Journey Funnel</h2>
+        <p>An event-based funnel from registration through completion, showing where users drop off
+           and where retention inflects — the kind of journey analysis used to prioritize UX fixes.</p>
+        <span class="cta">View funnel →</span>
+      </a>
+
+      <a class="card full" href="sample_kpi_query.pdf">
+        <div class="icon" style="background:#5f6368">{ }</div>
+        <div class="tags"><span class="tag">SQL</span><span class="tag">Relational databases</span><span class="tag">Data modeling</span></div>
+        <h2>Reporting SQL</h2>
+        <p>The query behind the dashboard — channel rollups, standard paid-KPI calculations
+           (CPA, CTR, CVR, ROAS), month-over-month comparisons, and window functions. Written in
+           standard SQL with CTEs and clear commenting.</p>
+        <span class="cta">View SQL (PDF) →</span>
+      </a>
+
+    </div>
+  </main>
+
+  <footer>Work samples · Built with illustrative data · No proprietary data used</footer>
+
+</body>
+</html>
