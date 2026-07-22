@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Course Journey — Analytics Sample</title>
+<style>
+  :root {
+    --bg: #f1f3f4;
+    --surface: #ffffff;
+    --ink: #202124;
+    --muted: #5f6368;
+    --line: #dadce0;
+    --blue: #1a73e8;
+    --blue-soft: #e8f0fe;
+    --green: #188038;
+    --red: #d93025;
+    --amber: #e37400;
+    --purple: #7b1fa2;
+    --teal: #12a4a4;
+    --shadow: 0 1px 2px rgba(60,64,67,.15), 0 1px 3px rgba(60,64,67,.1);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Google Sans", Roboto, -apple-system, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  header.topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    display: grid; place-items: center;
+    color: #fff; font-weight: 700; font-size: 16px;
+  }
+  .topbar h1 { font-size: 18px; margin: 0; font-weight: 500; }
+  .topbar .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .topbar .spacer { flex: 1; }
+  .daterange {
+    font-size: 13px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 12px; background: var(--surface);
+  }
+  .banner {
+    background: #fff8e1; border-bottom: 1px solid #f2d98c;
+    color: #7a5b00; font-size: 12.5px; padding: 8px 28px;
+    text-align: center;
+  }
+  main { padding: 24px 28px 60px; max-width: 1180px; margin: 0 auto; }
+  .section-title { font-size: 15px; font-weight: 500; margin: 26px 0 12px; color: var(--ink); }
+  .section-title:first-child { margin-top: 4px; }
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .card .label { font-size: 12px; color: var(--muted); }
+  .card .value { font-size: 26px; font-weight: 500; margin: 6px 0 4px; }
+  .card .delta { font-size: 12.5px; font-weight: 500; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+  .delta .muted { color: var(--muted); font-weight: 400; }
+  .panel {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 18px;
+  }
+  .panel h3 { margin: 0 0 4px; font-size: 14px; font-weight: 500; }
+  .panel .cap { color: var(--muted); font-size: 12px; margin: 0 0 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .tag.good { background: #e6f4ea; color: var(--green); }
+  .tag.warn { background: #fef7e0; color: var(--amber); }
+  .tag.bad  { background: #fce8e6; color: var(--red); }
+  .funnel-step { margin-bottom: 6px; }
+  .funnel-row { display: flex; align-items: center; gap: 16px; }
+  .funnel-meta { width: 230px; flex-shrink: 0; }
+  .funnel-meta .name { font-size: 13.5px; font-weight: 500; }
+  .funnel-meta .ev { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: var(--muted); }
+  .funnel-meta .n { font-size: 12px; color: var(--muted); }
+  .funnel-bar-wrap { flex: 1; }
+  .funnel-bar {
+    height: 38px; border-radius: 8px; display: flex; align-items: center;
+    color: #fff; font-size: 13px; font-weight: 500; padding-left: 14px;
+    white-space: nowrap; min-width: 42px;
+  }
+  .drop { width: 130px; flex-shrink: 0; text-align: right; font-size: 12.5px; }
+  .drop .pct { font-weight: 500; }
+  .drop.low .pct { color: var(--green); }
+  .drop.mid .pct { color: var(--amber); }
+  .drop.high .pct { color: var(--red); }
+  .halfway-divider {
+    display: flex; align-items: center; gap: 12px; margin: 14px 0 14px 246px;
+    color: var(--purple); font-size: 12px; font-weight: 500;
+  }
+  .halfway-divider::before, .halfway-divider::after {
+    content: ""; flex: 1; height: 1px; background: #e5d0ee;
+  }
+  .insight {
+    background: var(--blue-soft); border: 1px solid #c6dafc; border-radius: 10px;
+    padding: 12px 16px; font-size: 13px; color: #174ea6; margin-top: 4px;
+  }
+  .insight b { color: #0b3d91; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  footer.note { color: var(--muted); font-size: 11.5px; text-align: center; padding: 8px 28px 30px; }
+  @media (max-width: 900px) {
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .funnel-meta { width: 160px; }
+    .halfway-divider { margin-left: 176px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">◎</div>
+  <div>
+    <h1>Course Journey Analytics</h1>
+    <div class="sub">Site Registration → Course Completion Funnel</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="daterange">📅 Apr 1 – Jun 30, 2026 &nbsp;·&nbsp; vs. prior 90 days</div>
+</header>
+
+<main>
+
+  <div class="section-title">Overview</div>
+  <div class="cards">
+    <div class="card">
+      <div class="label">Site Views</div>
+      <div class="value">412,600</div>
+      <div class="delta up">▲ 9.1% <span class="muted">vs prior</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Site Registrations</div>
+      <div class="value">84,300</div>
+      <div class="delta up">▲ 11.4% <span class="muted">vs prior</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Course Registrations</div>
+      <div class="value">51,420</div>
+      <div class="delta up">▲ 7.6% <span class="muted">vs prior</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Course Completions</div>
+      <div class="value">14,880</div>
+      <div class="delta up">▲ 14.9% <span class="muted">vs prior</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Course journey funnel</h3>
+    <p class="cap">Users reaching each event, % of site registrations (top of funnel), and step-over-step drop-off. Progress events fire at 10% completion increments.</p>
+    <div id="funnelChart">
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">Site Registration</div><div class="ev">site_registration</div><div class="n">84,300 · 100% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%;background:#1a73e8">100%</div></div>
+        <div class="drop low"><span class="muted">entry</span></div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">Course Registration</div><div class="ev">course_registration</div><div class="n">51,420 · 61% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:61%;background:#1a73e8">61%</div></div>
+        <div class="drop high"><span class="pct">−39%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">Course Started</div><div class="ev">course_started</div><div class="n">42,680 · 51% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:51%;background:#1a73e8">51%</div></div>
+        <div class="drop mid"><span class="pct">−17%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">10% Complete</div><div class="ev">course_progress_10</div><div class="n">37,560 · 45% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:45%;background:#12a4a4">45%</div></div>
+        <div class="drop mid"><span class="pct">−12%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">20% Complete</div><div class="ev">course_progress_20</div><div class="n">33,050 · 39% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:39%;background:#12a4a4">39%</div></div>
+        <div class="drop mid"><span class="pct">−12%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">30% Complete</div><div class="ev">course_progress_30</div><div class="n">29,100 · 35% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:35%;background:#12a4a4">35%</div></div>
+        <div class="drop mid"><span class="pct">−12%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">40% Complete</div><div class="ev">course_progress_40</div><div class="n">20,660 · 25% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:25%;background:#12a4a4">25%</div></div>
+        <div class="drop high"><span class="pct">−29%</span> drop</div>
+      </div></div>
+
+      <div class="halfway-divider">HALFWAY POINT — retention inflection</div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">Halfway (50%)</div><div class="ev">course_halfway</div><div class="n">18,600 · 22% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:22%;background:#7b1fa2">22%</div></div>
+        <div class="drop low"><span class="pct">−10%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">60% Complete</div><div class="ev">course_progress_60</div><div class="n">17,670 · 21% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:21%;background:#7b1fa2">21%</div></div>
+        <div class="drop low"><span class="pct">−5%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">70% Complete</div><div class="ev">course_progress_70</div><div class="n">16,960 · 20% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:20%;background:#7b1fa2">20%</div></div>
+        <div class="drop low"><span class="pct">−4%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">80% Complete</div><div class="ev">course_progress_80</div><div class="n">16,450 · 20% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:20%;background:#7b1fa2">20%</div></div>
+        <div class="drop low"><span class="pct">−3%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">90% Complete</div><div class="ev">course_progress_90</div><div class="n">15,960 · 19% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:19%;background:#7b1fa2">19%</div></div>
+        <div class="drop low"><span class="pct">−3%</span> drop</div>
+      </div></div>
+
+      <div class="funnel-step"><div class="funnel-row">
+        <div class="funnel-meta"><div class="name">Course Completion</div><div class="ev">course_completion</div><div class="n">14,880 · 18% of top</div></div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:18%;background:#188038">18%</div></div>
+        <div class="drop low"><span class="pct">−7%</span> drop</div>
+      </div></div>
+
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>Biggest drop-off points</h3>
+      <p class="cap">Where the most users leave the journey</p>
+      <table>
+        <thead><tr><th>Transition</th><th class="num">Drop-off</th><th>Severity</th></tr></thead>
+        <tbody>
+          <tr><td>30% → 40% complete</td><td class="num">−29%</td><td><span class="tag bad">Highest (post-start)</span></td></tr>
+          <tr><td>Site reg → Course reg</td><td class="num">−39%</td><td><span class="tag warn">Pre-start</span></td></tr>
+          <tr><td>Course started → 10%</td><td class="num">−12%</td><td><span class="tag warn">Moderate</span></td></tr>
+          <tr><td>10% → 20% / 20% → 30%</td><td class="num">−12%</td><td><span class="tag warn">Moderate</span></td></tr>
+          <tr><td>Halfway → completion</td><td class="num">~3–7%</td><td><span class="tag good">Low</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>The halfway effect</h3>
+      <p class="cap">Likelihood of finishing, by furthest point reached</p>
+      <table>
+        <thead><tr><th>Reached…</th><th class="num">Went on to complete</th></tr></thead>
+        <tbody>
+          <tr><td>Course started</td><td class="num">35%</td></tr>
+          <tr><td>20% complete</td><td class="num">55%</td></tr>
+          <tr><td>40% complete</td><td class="num">75%</td></tr>
+          <tr><td>Halfway (50%)</td><td class="num"><b>85%</b></td></tr>
+          <tr><td>70% complete</td><td class="num">93%</td></tr>
+        </tbody>
+      </table>
+      <div class="insight" style="margin-top:14px">
+        <b>Key finding:</b> once a user starts a course, the single largest drop-off is the
+        <b>30% → 40% transition (−29%)</b>. But users who push past it and reach the
+        <b>halfway point complete at ~85%</b>. Halfway is the retention inflection: cross it and
+        the finish line is nearly assured.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Recommendations</h3>
+    <p class="cap">Ranked by modeled completion lift</p>
+    <table>
+      <thead><tr><th>#</th><th>Action</th><th>Target</th><th class="num">Est. completion lift</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Reduce friction between site &amp; course registration (fewer steps, clearer CTA)</td><td>−39% top drop</td><td class="num"><span class="tag good">+6–8%</span></td></tr>
+        <tr><td>2</td><td>Add a re-engagement nudge (email/push) at the 30% milestone to carry users past the 30→40% cliff</td><td>−29% post-start drop</td><td class="num"><span class="tag good">+4–6%</span></td></tr>
+        <tr><td>3</td><td>Push more users past the halfway "inflection" with a milestone reward</td><td>Halfway conversion</td><td class="num"><span class="tag good">+3–5%</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="color:#9aa0a6;font-size:11px;text-align:center;margin:28px 0 4px;">Sample built with illustrative data.</p>
+
+</main>
+
+</body>
+</html>
